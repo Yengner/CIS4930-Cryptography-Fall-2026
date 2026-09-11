@@ -1,17 +1,3 @@
-# Compiled C programs
-hmac
-alice
-bob
-*.o
-
-# Generated homework output files
-Key.txt
-ProcessedKey.txt
-FinalHash.txt
-Ciphertext.txt
-Signature.txt
-Response.txt
-Acknowledgment.txt
 
 # macOS
 .DS_Store

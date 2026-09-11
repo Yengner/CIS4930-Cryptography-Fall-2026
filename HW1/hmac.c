@@ -95,6 +95,85 @@ int main(int argc, char *argv[])
         return 1;
     }
 
- 
+    //HMAC = H((k xor opad) || H((k  ipad) || m))
+
+    int messageLen;
+    int keyLen;
+
+    unsigned char *message = Read_File(argv[1], &messageLen);
+    unsigned char *key = Read_File(argv[2], &keyLen);
+
+    char keyHex[(keyLen * 2) + 1];
+    Convert_to_Hex(keyHex, key, keyLen);
+    keyHex[keyLen * 2] = '\0';
+
+    Write_File("Key.txt", keyHex);
+
+    unsigned char processedKey[BLOCK_SIZE];
+
+    memset(processedKey, 0, BLOCK_SIZE);
+
+    // pdf: The program processes the secret key so that it is exactly the block size of the hashing function by Hashing it if it is larger than the block size, then if it is smaller … padding the right with zeroes until it is exactly the same size as the block size.
+    if (keyLen > BLOCK_SIZE)
+    {
+        unsigned char *hashedKey = Hash_Blake2s(key, keyLen);
+
+        memcpy(processedKey, hashedKey, HASH_SIZE);
+        free(hashedKey);
+
+    }
+    else
+    {
+        memcpy(processedKey, key, keyLen);
+    }
+
+    // Write processed key in hex
+    char processedKeyHex[(BLOCK_SIZE * 2) + 1];
+    Convert_to_Hex(processedKeyHex, processedKey, BLOCK_SIZE);
+    processedKeyHex[BLOCK_SIZE * 2] = '\0';
+
+    Write_File("ProcessedKey.txt", processedKeyHex);
+
+    // Create inner and outer padded keys
+    unsigned char innerKey[BLOCK_SIZE];
+    unsigned char outerKey[BLOCK_SIZE];
+
+    for (int i = 0; i < BLOCK_SIZE; i++)
+    {
+        innerKey[i] = processedKey[i] ^ 0x36;
+        outerKey[i] = processedKey[i] ^ 0x5c;
+    }
+
+    // H((key XOR ipad) || message)
+    int innerInputLen = BLOCK_SIZE + messageLen;
+    unsigned char *innerInput = malloc(innerInputLen);
+
+    memcpy(innerInput, innerKey, BLOCK_SIZE);
+    memcpy(innerInput + BLOCK_SIZE, message, messageLen);
+
+    unsigned char *innerHash = Hash_Blake2s(innerInput, innerInputLen);
+
+    // H((key XOR opad) || innerHash)
+    int outerInputLen = BLOCK_SIZE + HASH_SIZE; 
+    unsigned char *outerInput = malloc(outerInputLen);
+
+    memcpy(outerInput, outerKey, BLOCK_SIZE);
+    memcpy(outerInput + BLOCK_SIZE, innerHash, HASH_SIZE);
+
+    unsigned char *finalHash = Hash_Blake2s(outerInput, outerInputLen);
+
+    char finalHashHex[(HASH_SIZE * 2) + 1];
+    Convert_to_Hex(finalHashHex, finalHash, HASH_SIZE);
+    finalHashHex[HASH_SIZE * 2] = '\0';
+
+    Write_File("FinalHash.txt", finalHashHex);
+
+    free(message);
+    free(key);
+    free(innerInput);
+    free(innerHash);
+    free(outerInput);
+    free(finalHash);
+
     return 0;
 }
