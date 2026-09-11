@@ -1,14 +1,3 @@
-/*
- * CIS 4930 - Homework 1
- * Part 2: HMAC with BLAKE2s
- *
- * Compile:
- * gcc hmac.c -lssl -lcrypto -o hmac
- *
- * Run:
- * ./hmac Message1.txt SharedKey1.txt
- */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -21,7 +10,7 @@ unsigned char *Read_File(char fileName[], int *fileLen);
 void Write_File(char fileName[], char input[]);
 void Convert_to_Hex(char output[], unsigned char input[], int inputlength);
 unsigned char *Hash_Blake2s(unsigned char *input, unsigned long inputlen);
-void Concatenation(unsigned char *in1, size_t in1len, unsigned char *in2, size_t in2len, unsigned char *out, size_t outlen);
+void Concatenation32(unsigned char a[32], unsigned char b[32], unsigned char c[64]);
 
 /* Read all bytes from a file. */
 unsigned char *Read_File(char fileName[], int *fileLen)

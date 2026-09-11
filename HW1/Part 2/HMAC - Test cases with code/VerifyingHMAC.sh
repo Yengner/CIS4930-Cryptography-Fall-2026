@@ -1,6 +1,10 @@
 #!/bin/bash
 
-gcc hmac.c -lssl -lcrypto -o hmac
+gcc hmac.c \
+-I"$(brew --prefix openssl@3)/include" \
+-L"$(brew --prefix openssl@3)/lib" \
+-lssl -lcrypto \
+-o hmac
 
 for i in 1 2 3
 do

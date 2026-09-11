@@ -1,7 +1,8 @@
 #!/bin/bash
 
-gcc alice.c -lssl -lcrypto -o alice
-gcc bob.c -lssl -lcrypto -o bob
+gcc alice.c -I$(brew --prefix openssl@3)/include -L$(brew --prefix openssl@3)/lib -lssl -lcrypto -o alice
+
+gcc bob.c -I$(brew --prefix openssl@3)/include -L$(brew --prefix openssl@3)/lib -lssl -lcrypto -o bob
 
 for i in 1 2 3 4 5
 do
